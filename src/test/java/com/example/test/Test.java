@@ -1,3 +1,5 @@
+package com.example.test;
+
 import com.example.multiple_datasources_spring.service.DemoService;
 import com.example.multiple_datasources_spring.service.TestService;
 import org.springframework.context.ApplicationContext;
