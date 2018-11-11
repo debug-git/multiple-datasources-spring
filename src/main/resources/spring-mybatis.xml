@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+      http://www.springframework.org/schema/aop
+          http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:dataScources.properties"/>
+    </bean>
+    <!-- 自动扫描，多个包以 逗号分隔 -->
+    <context:component-scan base-package="com.example.multiple_datasources_spring"/>
+
+    <!--主数据源-->
+    <bean id="testDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${test.driver}"/>
+        <property name="url" value="${test.url}"/>
+        <property name="username" value="${test.username}"/>
+        <property name="password" value="${test.password}"/>
+        <property name="initialSize" value="${initialSize}"/>
+        <property name="minIdle" value="${minIdle}"/>
+       <!-- <property name="maxIdle" value="${jdbc.maxIdle}"/>-->
+        <property name="maxActive" value="${maxActive}"/>
+        <property name="maxWait" value="${maxWait}"/>
+        <property name="defaultAutoCommit" value="${defaultAutoCommit}"/>
+        <property name="removeAbandoned" value="${removeAbandoned}"/>
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}"/>
+        <property name="testWhileIdle" value="${testWhileIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}"/>
+        <!--<property name="numTestsPerEvictionRun" value="${jdbc.numTestsPerEvictionRun}"/>-->
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}"/>
+    </bean>
+
+    <!--从数据源-->
+    <bean id="demoDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${demo.driver}"/>
+        <property name="url" value="${demo.url}"/>
+        <property name="username" value="${demo.username}"/>
+        <property name="password" value="${demo.password}"/>
+        <property name="initialSize" value="${initialSize}"/>
+        <property name="minIdle" value="${minIdle}"/>
+        <!-- <property name="maxIdle" value="${jdbc.maxIdle}"/>-->
+        <property name="maxActive" value="${maxActive}"/>
+        <property name="maxWait" value="${maxWait}"/>
+        <property name="defaultAutoCommit" value="${defaultAutoCommit}"/>
+        <property name="removeAbandoned" value="${removeAbandoned}"/>
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}"/>
+        <property name="testWhileIdle" value="${testWhileIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}"/>
+        <!--<property name="numTestsPerEvictionRun" value="${jdbc.numTestsPerEvictionRun}"/>-->
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}"/>
+    </bean>
+
+    <!--自定义切换数据源-->
+    <bean id="multipleDataSource" class="com.example.multiple_datasources_spring.util.MultipleDataSource">
+        <property name="defaultTargetDataSource" ref="testDataSource"/>
+        <property name="targetDataSources">
+            <map>
+                <entry key="testDataSource" value-ref="testDataSource"/>
+                <entry key="demoDataSource" value-ref="demoDataSource"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="multipleDataSource"/>
+        <property name="mapperLocations" value="classpath:mapping/*.xml"/>
+    </bean>
+
+    <!-- mybatis.spring自动映射 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.example.multiple_datasources_spring.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!-- 配置事务管理器 -->
+    <!--<bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="multipleDataSource" />
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="remove*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="find*" propagation="SUPPORTS"/>
+            <tx:method name="get*" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.example.multiple_datasources_spring.service.impl.*(..))" order="2"/>
+        &lt;!&ndash;<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.coe.exp.core.dao..*Impl.*(..))" order="3"/>&ndash;&gt;
+    </aop:config>
+
+    &lt;!&ndash; 注解方式配置事物   &ndash;&gt;
+    <tx:annotation-driven transaction-manager="transactionManager" />-->
+
+</beans>
