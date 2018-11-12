@@ -41,11 +41,11 @@ public class Test {
 //        testMapper = applicationContext.getBean(TestMapper.class);
 //        demoMapper = applicationContext.getBean(DemoMapper.class);
 
-        //设置数据源为MySql,使用了AOP测试时请将下面这行注释
+        //设置数据源为testDataSource,使用了AOP测试时请将下面这行注释
 //        MultipleDataSource.setDataSourceKey("testDataSource");
         Integer testCount = testService.getCount();
         System.out.println("test.user2表有"+testCount+"条数据");
-        //设置数据源为SqlServer,使用AOP测试时请将下面这行注释
+        //设置数据源为demoDataSource,使用AOP测试时请将下面这行注释
 //        MultipleDataSource.setDataSourceKey("demoDataSource");
         Integer demoCount = demoService.getCount();
         System.out.println("demo.user表有"+demoCount+"条数据");
